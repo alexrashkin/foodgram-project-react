@@ -111,13 +111,11 @@ class RecipesIngredients(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         related_name="recipes_ingredients",
-        verbose_name="В рецептах",
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name="recipes_ingredients",
-        verbose_name="Связанные ингредиенты",
+        related_name="used_in_recipes",
     )
     amount = models.PositiveIntegerField(
         validators=[MinValueValidator(1, message='Минимальное кол-во ингредиентов 1'),
@@ -127,7 +125,7 @@ class RecipesIngredients(models.Model):
 
     class Meta:
         verbose_name = "Ингредиент в рецепте"
-        verbose_name = "Ингредиенты в рецептах"
+        verbose_name_plural = "Ингредиенты в рецептах"
 
     def __str__(self):
         return f'{self.ingredient} в {self.recipe}'

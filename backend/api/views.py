@@ -3,7 +3,8 @@ from .serializers import (UserSerializer, TagSerializer,
                             RecipeSaveSerializer,
                             RecipeGetSerializer,
                             SubscribeSerializer,
-                            FavoriteSerializer
+                            FavoriteSerializer,
+                            IngredientRecipeSerializer
                             )
 from django.db.models import F, Sum
 from djoser.views import UserViewSet
@@ -21,6 +22,10 @@ from .permissions import (
     IsAdminOrAuthorOrReadOnly, IsAdminUserOrReadOnly, IsOwnerAdmin
 )
 from rest_framework.response import Response
+
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class IngredientsViewset(mixins.ListModelMixin,
@@ -48,7 +53,6 @@ class RecipesViewset(viewsets.ModelViewSet):
     """
 
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSaveSerializer
     permission_classes = (IsAdminOrAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     ordering = ['-id']
@@ -60,27 +64,30 @@ class RecipesViewset(viewsets.ModelViewSet):
         """
 
         serializer.save(author=self.request.user)
-
+    
     def get_serializer_class(self):
         """
-        Определяет класс сериализатора на основе действия.
-        Использует RecipeSaveSerializer для действий create и partial_update,
-        и RecipeGetSerializer для остальных действий.
+        Возвращает соответствующий сериализатор в зависимости от метода запроса.
         """
+        if self.action == 'list' or self.action == 'retrieve':
+            return RecipeGetSerializer
+        return RecipeSaveSerializer
 
-        if self.action in ['create', 'partial_update']:
-            return RecipeSaveSerializer
-        return RecipeGetSerializer
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response('Рецепт успешно удален',
+                        status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['post', 'delete'], detail=True,
             permission_classes=(IsOwnerAdmin,))
-    def favorite(self, request, id):
+    def favorite(self, request, pk):
         """
         Добавляет или удаляет рецепт из избранного для пользователя.
-        Метод POST - добавление в избранное, DELETE - удаление из избранного.
+        POST - добавление в избранное, DELETE - удаление из избранного.
         """
 
-        recipe = get_object_or_404(Recipe, id=id)
+        recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'POST':
             if Favorite.objects.filter(user=request.user,
                                        recipe=recipe).exists():

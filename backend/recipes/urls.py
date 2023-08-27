@@ -14,8 +14,10 @@ router.register('ingredients', IngredientsViewset, basename='ingredients')
 router.register('tags', TagViewset, basename='tags')
 
 urlpatterns = [
-    path('recipes/download_shopping_list/',
+    path('api/recipes/download_shopping_list/',
          RecipesViewset.as_view(
           {'get': 'download_shopping_list'}), name='download'),
     path('', include(router.urls)),
+    path('recipes/<int:id>/', RecipesViewset.as_view({'get': 'retrieve', 'put': 'update'}), name='recipe-detail'),
+    path('api/recipes/favorite/', RecipesViewset.as_view({'post': 'favorite'}), name='recipe-favorite'),
 ]
