@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import (Favorite, Ingredient, Recipe, RecipesIngredients,
-                            ShoppingList, Tag)
+                            ShoppingCart, Tag)
 from users.models import Subscription, User
 
 
@@ -37,9 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'email', 'username', 'first_name',
                   'last_name', 'password', 'is_subscribed')
-        #write_only_fields = ('password',)
-        #read_only_fields = ('id',)
-
+                
     def create(self, validated_data):
         """
         Создает и сохраняет нового пользователя.
@@ -48,7 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             username=validated_data['username'],
             first_name=validated_data['first_name'],
-            last_name=validated_data.get['last_name', '']
+            last_name=validated_data.get['last_name']
         )
         user.set_password(validated_data['password'])
         user.save()
@@ -58,10 +56,10 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Возвращает True, если текущий пользователь подписан на пользователя obj.
         """
-        request = self.context.get('request')
-        if request and request.user.is_not_authenticated:
+        user = self.context['request'].user
+        if user.is_anonymous:
             return False
-        return Subscription.objects.filter(user=request.user, author=obj).exists()
+        return Subscription.objects.filter(user=user, author=obj).exists()
     
     def to_representation(self, instance):
         """Функция для измения представления при GET и POST запросах."""
@@ -254,18 +252,11 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField(required=False)
     
-    class Meta:
-        model = Recipe
-        fields = '__all__'
-        read_only_fields = ('id', 'author',)
-
     def get_is_favorited(self, obj):
         """
         Проверяет, добавлен ли рецепт в избранное у текущего пользователя.
         """
         request = self.context.get('request')
-        print("Request User:", request.user)
-        print("Recipe ID:", obj.id)
         return request.user.is_authenticated and Favorite.objects.filter(
             user=request.user, recipe__id=obj.id).exists()
     
@@ -274,10 +265,13 @@ class RecipeGetSerializer(serializers.ModelSerializer):
         Проверяет, добавлен ли рецепт в список покупок у текущего пользователя.
         """
         request = self.context.get('request')
-        print("Request User:", request.user)
-        print("Recipe ID:", obj.id)
-        return request.user.is_authenticated and ShoppingList.objects.filter(
+        return request.user.is_authenticated and ShoppingCart.objects.filter(
             user=request.user, recipe__id=obj.id).exists()
+    
+    class Meta:
+        model = Recipe
+        fields = '__all__'
+        read_only_fields = ('id', 'author',)
 
 class UserSubscribeControlSerializer(UserSerializer):
     """Сериализатор для управления подпиской/отпиской пользователя."""
@@ -339,15 +333,15 @@ class SubscribeSerializer(serializers.ModelSerializer):
         return data
 
 
-class ShoppingListSerializer(serializers.ModelSerializer):
+class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для работы со списком покупок."""
 
     class Meta:
-        model = ShoppingList
+        model = ShoppingCart
         fields = '__all__'
         validators = [
             UniqueTogetherValidator(
-                queryset=ShoppingList.objects.all(),
+                queryset=ShoppingCart.objects.all(),
                 fields=('user', 'recipe'),
                 message='Рецепт уже добавлен в список покупок'
             )
@@ -355,7 +349,7 @@ class ShoppingListSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         """
-        Преобразует экземпляр модели ShoppingList в сериализованные данные.
+        Преобразует экземпляр модели ShoppingCart в сериализованные данные.
         """
         request = self.context.get('request')
         return RecipeSaveSerializer(

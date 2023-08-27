@@ -10,7 +10,7 @@ from django.db.models import F, Sum
 from djoser.views import UserViewSet
 from django.shortcuts import HttpResponse, get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (RecipesIngredients, Favorite, ShoppingList, Recipe,
+from recipes.models import (RecipesIngredients, Favorite, ShoppingCart, Recipe,
                             Ingredient, Tag)
 from users.models import User, Subscription
 from rest_framework import mixins, status, viewsets
@@ -64,7 +64,7 @@ class RecipesViewset(viewsets.ModelViewSet):
         """
 
         serializer.save(author=self.request.user)
-    
+
     def get_serializer_class(self):
         """
         Возвращает соответствующий сериализатор в зависимости от метода запроса.
@@ -107,25 +107,29 @@ class RecipesViewset(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'],
             permission_classes=(IsOwnerAdmin,))
-    def download_shopping_list(self, request):
+    def download_shopping_cart(self, request):
         """
         Генерирует список покупок для рецептов пользователя и предоставляет его для скачивания.
         """
 
-        shopping_list = RecipesIngredients.objects.filter(
-            recipe__shopping_cart__user=request.user).values(
+        recipes = Recipe.objects.filter(shopping_cart__user=request.user)
+    
+        shopping_cart = RecipesIngredients.objects.filter(
+            recipe__in=recipes).values(
             name=F('ingredient__name'),
             units=F('ingredient__measurement_unit')).order_by(
             'ingredient__name').annotate(total=Sum('amount'))
+    
         text = 'Список покупок: \n\n'
         ingr_list = []
-        for recipe in shopping_list:
+        for recipe in shopping_cart:
             ingr_list.append(recipe)
         for i in ingr_list:
             text += f'{i["name"]}: {i["total"]}, {i["units"]}.\n'
+    
         response = HttpResponse(text, content_type='text/plain')
         response['Content-Disposition'] = ('attachment;'
-                                           'filename="shopping_list.txt"')
+                                       'filename="shopping_cart.txt"')
         return response
 
 

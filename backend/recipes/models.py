@@ -160,7 +160,7 @@ class Favorite(models.Model):
         return f'{self.recipe} {self.user}'
     
 
-class ShoppingList(models.Model):
+class ShoppingCart(models.Model):
     """Создание модели списка покупок."""
 
     user = models.ForeignKey(
@@ -171,7 +171,7 @@ class ShoppingList(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name="shoppinglist",
+        related_name="shoppingcart",
         verbose_name="Рецепт",
     )
 
@@ -180,7 +180,7 @@ class ShoppingList(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='unique_shoppinglist'
+                name='unique_shoppingcart'
             )
         ]
 
