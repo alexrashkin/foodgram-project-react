@@ -1,15 +1,20 @@
-import os
 import csv
+import os
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
+
 from recipes.models import Ingredient
+
 
 class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
         file_dir = '/home/sanya/foodgram-project-react/data'
+
+        if not os.path.exists(file_dir):
+            file_dir = '/app/data'
 
         with open(os.path.join(file_dir, 'ingredients.csv'), 'r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)

@@ -1,30 +1,29 @@
-from .serializers import (UserSerializer, TagSerializer,
-                            IngredientSerializer, RecipeSaveSerializer,
-                            RecipeSaveSerializer,
-                            RecipeGetSerializer,
-                            SubscribeSerializer,
-                            FavoriteSerializer,
-                            IngredientRecipeSerializer
-                            )
+import logging
+
 from django.db.models import F, Sum
-from djoser.views import UserViewSet
 from django.shortcuts import HttpResponse, get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (RecipesIngredients, Favorite, ShoppingCart, Recipe,
-                            Ingredient, Tag)
-from users.models import User, Subscription
+from djoser.views import UserViewSet
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
-from .permissions import (
-    IsAdminOrAuthorOrReadOnly, IsAdminUserOrReadOnly, IsOwnerAdmin
-)
 from rest_framework.response import Response
 
+from recipes.models import (Favorite, Ingredient, Recipe, RecipesIngredients,
+                            ShoppingCart, Tag)
+from users.models import Subscription, User
 
-import logging
+from .permissions import (IsAdminOrAuthorOrReadOnly, IsAdminUserOrReadOnly,
+                          IsOwnerAdmin)
+from .serializers import (FavoriteSerializer, IngredientSerializer,
+                          RecipeGetSerializer, RecipeSaveSerializer,
+                          ShoppingCartSerializer, SubscribeSerializer,
+                          TagSerializer, UserSerializer)
+from .filters import IngredientFilter, RecipeFilter
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -42,6 +41,48 @@ class IngredientsViewset(mixins.ListModelMixin,
     permission_classes = (IsAdminUserOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     pagination_class = None
+    filterset_class = IngredientFilter
+
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+    serializer_class = FavoriteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Favorite.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def perform_destroy(self, instance):
+        if instance.user == self.request.user:
+            instance.delete()
+
+    @action(methods=['POST', 'DELETE'], detail=True, permission_classes=[IsAuthenticated])
+    def favorite(self, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+        
+        if request.method == 'POST':
+            context = {'request': request}
+            recipe = get_object_or_404(Recipe, id=pk)
+            data = {
+                'user': request.user.id,
+                'recipe': recipe.id
+            }
+    
+            serializer = FavoriteSerializer(data=data, context=context)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        elif request.method == 'DELETE':
+            deleted_favs = Favorite.objects.filter(user=request.user, recipe=recipe).delete()
+    
+            if deleted_favs[0] == 0:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+    
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RecipesViewset(viewsets.ModelViewSet):
@@ -57,6 +98,18 @@ class RecipesViewset(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     ordering = ['-id']
     pagination_class = PageNumberPagination
+    filterset_class = RecipeFilter
+
+    def get_queryset(self):
+        is_favorited = self.request.query_params.get('is_favorited')        
+        if is_favorited is not None and int(is_favorited) == 1:
+            return Recipe.objects.filter(favorites__user=self.request.user)
+        
+        is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
+        if is_in_shopping_cart is not None and int(is_in_shopping_cart) == 1:
+            return Recipe.objects.filter(shopping_cart__user=self.request.user)
+        
+        return Recipe.objects.all()
 
     def perform_create(self, serializer):
         """
@@ -81,7 +134,7 @@ class RecipesViewset(viewsets.ModelViewSet):
 
     @action(methods=['post', 'delete'], detail=True,
             permission_classes=(IsOwnerAdmin,))
-    def favorite(self, request, pk):
+    def favorites(self, request, pk):
         """
         Добавляет или удаляет рецепт из избранного для пользователя.
         POST - добавление в избранное, DELETE - удаление из избранного.
@@ -104,6 +157,24 @@ class RecipesViewset(viewsets.ModelViewSet):
             self.perform_destroy(old_fav)
             return Response(status=status.HTTP_204_NO_CONTENT)
         raise MethodNotAllowed(request.method)
+    
+    @action(methods=['POST', 'DELETE'], detail=True, permission_classes=[IsAuthenticated])
+    def shopping_cart(self, request, pk):
+        recipe = self.get_object()
+
+        if request.method == 'POST':
+            new_cart_item, created = ShoppingCart.objects.get_or_create(user=request.user, recipe=recipe)
+
+            if not created:
+                return Response({'detail': 'Рецепт уже добавлен в список покупок.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = ShoppingCartSerializer(new_cart_item, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'DELETE':
+            cart_item = get_object_or_404(ShoppingCart, user=request.user, recipe=recipe)
+            cart_item.delete()
+            return Response({'detail': 'Рецепт успешно удален из списка покупок.'}, status=status.HTTP_204_NO_CONTENT)
     
     @action(detail=False, methods=['get'],
             permission_classes=(IsOwnerAdmin,))
@@ -131,7 +202,7 @@ class RecipesViewset(viewsets.ModelViewSet):
         response['Content-Disposition'] = ('attachment;'
                                        'filename="shopping_cart.txt"')
         return response
-
+    
 
 class TagViewset(mixins.ListModelMixin,
                  mixins.RetrieveModelMixin,
@@ -158,7 +229,7 @@ class UserViewset(UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     
-    @action(methods=['post', 'delete'], detail=True,
+    @action(methods=['POST', 'DELETE'], detail=True,
             permission_classes=(IsAuthenticated,))
     def subscribe(self, request, id=None):
         """
@@ -185,7 +256,7 @@ class UserViewset(UserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         raise MethodNotAllowed(request.method)
 
-    @action(methods=['get'], detail=False,
+    @action(methods=['GET'], detail=False,
             serializer_class=SubscribeSerializer,
             permission_classes=(IsOwnerAdmin,))
     def subscriptions(self, request):
