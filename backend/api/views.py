@@ -15,7 +15,7 @@ from recipes.models import (Favorite, Ingredient, Recipe, RecipesIngredients,
                             ShoppingCart, Tag)
 from users.models import Subscription, User
 
-from .permissions import (IsAdminOrAuthorOrReadOnly, IsAdminUserOrReadOnly,
+from .permissions import (IsAdminUserOrReadOnly,
                           IsOwnerAdmin)
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeGetSerializer, RecipeSaveSerializer,
@@ -94,9 +94,8 @@ class RecipesViewset(viewsets.ModelViewSet):
     """
 
     queryset = Recipe.objects.all()
-    permission_classes = (IsAdminOrAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    ordering = ['-id']
+    ordering = ['-pub_date']
     pagination_class = PageNumberPagination
     filterset_class = RecipeFilter
 
@@ -177,7 +176,7 @@ class RecipesViewset(viewsets.ModelViewSet):
             return Response({'detail': 'Рецепт успешно удален из списка покупок.'}, status=status.HTTP_204_NO_CONTENT)
     
     @action(detail=False, methods=['get'],
-            permission_classes=(IsOwnerAdmin,))
+            permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
         """
         Генерирует список покупок для рецептов пользователя и предоставляет его для скачивания.
@@ -234,40 +233,86 @@ class UserViewset(UserViewSet):
     def subscribe(self, request, id=None):
         """
         Добавляет или удаляет подписку на пользователя.
-        Метод POST - добавление подписки, DELETE - удаление подписки.
+        POST - добавление подписки, DELETE - удаление подписки.
         """
 
+        user = request.user
         author = get_object_or_404(User, id=id)
+
         if request.method == 'POST':
-            if Subscription.objects.filter(
-                user_id=request.user.id, author_id=author.id).exists() or request.user == author:
+            if request.user == author:
                 return Response({
-                    'detail': 'Подписка уже есть или Вы пытаетесь подписаться на себя'
+                    'detail': 'Вы не можете подписаться на себя'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            new_sub = Subscription.objects.create(user=request.user, author=author)
-            serializer = SubscribeSerializer(new_sub,
-                                         context={'request': request})
+
+            if Subscription.objects.filter(user=user, author=author).exists():
+                return Response({
+                    'detail': 'Подписка уже существует'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            new_sub = Subscription.objects.create(user=user, author=author)
+            serializer = SubscribeSerializer(new_sub, context={'request': request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         if request.method == 'DELETE':
             instance = get_object_or_404(
-                Subscription, user=request.user, author=author
+                Subscription, user=user, author=author
             )
             self.perform_destroy(instance)
             return Response(status=status.HTTP_204_NO_CONTENT)
+
         raise MethodNotAllowed(request.method)
 
     @action(methods=['GET'], detail=False,
-            serializer_class=SubscribeSerializer,
-            permission_classes=(IsOwnerAdmin,))
+            permission_classes=(IsAuthenticated,))
     def subscriptions(self, request):
         """
         Получает список подписок пользователя.
         """
 
-        queryset = Subscription.objects.filter(user_id=request.user.id)
+        user = request.user
+        queryset = Subscription.objects.filter(user=user)
         page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return self.get_paginated_response(serializer.data)
+        serializer = SubscribeSerializer(
+            page,
+            many=True,
+            context={'request': request}
+        )
+
+        subscriptions_data = serializer.data
+
+        results = []
+        for subscription in subscriptions_data:
+            author = User.objects.get(id=subscription['author'])
+            recipes = Recipe.objects.filter(author=author).order_by('-pub_date')
+            recipe_data = []
+            for recipe in recipes:
+                recipe_data.append({
+                    "id": recipe.id,
+                    "name": recipe.name,
+                    "image": recipe.image.url,
+                    "cooking_time": recipe.cooking_time,
+                })
+            
+            result_entry = {
+                "email": author.email,
+                "id": author.id,
+                "username": author.username,
+                "first_name": author.first_name,
+                "last_name": author.last_name,
+                "is_subscribed": True,
+                "recipes": recipe_data,
+                "recipes_count": recipes.count(),
+            }
+            
+            results.append(result_entry)
+
+        response_data = {
+            "count": queryset.count(),
+            "next": None,
+            "previous": None,
+            "results": results,
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+        

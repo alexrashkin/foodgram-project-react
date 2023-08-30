@@ -21,6 +21,6 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Subscription)
 class FollowAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'following')
-    list_filter = ('user', 'following')
+    list_display = ('id', 'user', 'author')
+    list_filter = ('user', 'author')
     empty_value_display = '-пусто-'

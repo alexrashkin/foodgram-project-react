@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import models
 
 from .validators import validate_username
@@ -79,11 +78,12 @@ class Subscription(models.Model):
         related_name="follower",
         verbose_name="Подписчик"
     )
-    following = models.ForeignKey(
+    author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="following",
+        related_name="following_author",
         verbose_name="Автор",
+        default=None
     )
 
     class Meta:
@@ -91,10 +91,10 @@ class Subscription(models.Model):
         verbose_name_plural = "Подписки"
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'following'],
+                fields=['user', 'author'],
                 name='unique_follow'
             )
         ]
     
     def __str__(self):
-        return f'Пользователь: {self.user.username} подписан на {self.following.username}'
+        return f'Пользователь: {self.user.username} подписан на {self.author.username}'
