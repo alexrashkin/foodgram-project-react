@@ -10,16 +10,13 @@
 
 ```
 git clone https://github.com/alexrashkin/foodgram-project-react.git
-```
-
-```
 cd foodgram-project-react
+```
 
 Cоздать и активировать виртуальное окружение:
 
-```
 python3 -m venv env
-```
+
 
 * Если у вас Linux/macOS
 
@@ -53,7 +50,7 @@ python3 manage.py migrate
 
 ```
 python3 manage.py runserver
-```
-# Над проектом работали: 
-- Frontend - https://github.com/yandex-praktikum/foodgram-project-react
+
+Над проектом работали: 
 - Backend - https://github.com/alexrashkin
+- Frontend - https://github.com/yandex-praktikum/foodgram-project-react
