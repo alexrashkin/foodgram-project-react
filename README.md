@@ -15,8 +15,9 @@ cd foodgram-project-react
 
 Cоздать и активировать виртуальное окружение:
 
+```
 python3 -m venv env
-
+```
 
 * Если у вас Linux/macOS
 
@@ -50,6 +51,7 @@ python3 manage.py migrate
 
 ```
 python3 manage.py runserver
+```
 
 Над проектом работали: 
 - Backend - https://github.com/alexrashkin
