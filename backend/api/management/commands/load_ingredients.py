@@ -16,7 +16,8 @@ class Command(BaseCommand):
         if not os.path.exists(file_dir):
             file_dir = '/app/data'
 
-        with open(os.path.join(file_dir, 'ingredients.csv'), 'r', encoding='utf-8') as csvfile:
+        with open(os.path.join(file_dir, 'ingredients.csv'),
+                  'r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
             next(reader)
             for row in reader:
@@ -27,6 +28,12 @@ class Command(BaseCommand):
                         measurement_unit=measurement_unit,
                     )
                     if created:
-                        self.stdout.write(self.style.SUCCESS(f'Created ingredient: {name}, {measurement_unit}'))
+                        message = (
+                            f'Created ingredient: {name}, {measurement_unit}'
+                        )
                     else:
-                        self.stdout.write(self.style.SUCCESS(f'Ingredient already exists: {name}, {measurement_unit}'))
+                        message = (
+                            f'Ingredient already exists: {name}, '
+                            f'{measurement_unit}'
+                        )
+                    self.stdout.write(self.style.SUCCESS(message))

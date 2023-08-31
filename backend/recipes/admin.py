@@ -23,11 +23,11 @@ class RecipeAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'name', 'author')
     list_filter = ('name', 'author', 'tags')
-    
+
     def in_favorite(self, obj):
         count = obj.in_favorite.all().count()
         return count
-    
+
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
@@ -40,4 +40,3 @@ class FavoriteAdmin(admin.ModelAdmin):
 class ShoppingCartAdmin(admin.ModelAdmin):
     """Модель списка покупок в админке."""
     list_display = ('id', 'user', 'recipe')
-    

@@ -13,7 +13,7 @@ class Tag(models.Model):
         unique=True,
         max_length=50,
     )
-    
+
     color = models.CharField(
         verbose_name="Цветовой HEX-код",
         unique=True,
@@ -94,11 +94,11 @@ class Recipe(models.Model):
         auto_now_add=True,
         verbose_name="Дата публикации"
     )
-    
+
     class Meta:
         ordering = ('-pub_date', )
         verbose_name = "Рецепт"
-        verbose_name_plural= "Рецепты"
+        verbose_name_plural = "Рецепты"
 
     def __str__(self):
         return self.name
@@ -118,8 +118,10 @@ class RecipesIngredients(models.Model):
         related_name="used_in_recipes",
     )
     amount = models.PositiveIntegerField(
-        validators=[MinValueValidator(1, message='Минимальное кол-во ингредиентов 1'),
-                    MaxValueValidator(50, message='Максимальное кол-во ингредиентов 50')],
+        validators=[
+            MinValueValidator(1, message='Минимальное кол-во ингред-ов 1'),
+            MaxValueValidator(50, message='Максимальное кол-во ингред-ов 50')
+        ],
         verbose_name="Количество"
     )
 
@@ -129,7 +131,7 @@ class RecipesIngredients(models.Model):
 
     def __str__(self):
         return f'{self.ingredient} в {self.recipe}'
-    
+
 
 class Favorite(models.Model):
     """Создание модели избранного."""
@@ -155,10 +157,10 @@ class Favorite(models.Model):
                 name='unique_favorite'
             )
         ]
-    
+
     def __str__(self):
         return f'{self.recipe} {self.user}'
-    
+
 
 class ShoppingCart(models.Model):
     """Создание модели списка покупок."""

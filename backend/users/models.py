@@ -60,7 +60,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
-    
+
     @property
     def is_user(self):
         return self.role == self.USER
@@ -68,6 +68,7 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return self.role == self. ADMIN or self.is_superuser
+
 
 class Subscription(models.Model):
     """Создание модели подписки."""
@@ -95,6 +96,9 @@ class Subscription(models.Model):
                 name='unique_follow'
             )
         ]
-    
+
     def __str__(self):
-        return f'Пользователь: {self.user.username} подписан на {self.author.username}'
+        return (
+            f'Пользователь: {self.user.username} '
+            f'подписан на {self.author.username}'
+        )

@@ -4,7 +4,7 @@ from recipes.models import Tag
 
 
 class Command(BaseCommand):
-    
+
     def handle(self, *args, **kwargs):
         data = [
             {'name': 'Завтрак', 'color': '#FF5733', 'slug': 'breakfast'},
