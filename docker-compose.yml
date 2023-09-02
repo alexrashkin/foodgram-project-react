@@ -29,13 +29,13 @@ services:
       - static:/frontend_static
       - ./frontend/:/app/result_build/
 
-  gateway:
+  nginx:
     build: ./nginx/
     env_file: .env
     volumes:
       - static:/backend_static/
       - media:/media/
-      - ./infra/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
     ports:
