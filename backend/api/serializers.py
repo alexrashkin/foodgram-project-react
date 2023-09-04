@@ -2,11 +2,10 @@ import base64
 import logging
 
 from django.core.files.base import ContentFile
-from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
-
 from recipes.models import (Favorite, Ingredient, Recipe, RecipesIngredients,
                             ShoppingCart, Tag)
+from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from users.models import Subscription, User
 
 logger = logging.getLogger(__name__)

@@ -4,15 +4,14 @@ from django.db.models import F, Sum
 from django.shortcuts import HttpResponse, get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
+from recipes.models import (Favorite, Ingredient, Recipe, RecipesIngredients,
+                            ShoppingCart, Tag)
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from recipes.models import (Favorite, Ingredient, Recipe, RecipesIngredients,
-                            ShoppingCart, Tag)
 from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
@@ -77,7 +76,7 @@ class FavoriteViewSet(viewsets.ModelViewSet):
 
         elif request.method == 'DELETE':
             deleted_favs = Favorite.objects.filter(
-                           user=request.user, recipe=recipe).delete()
+                user=request.user, recipe=recipe).delete()
 
             if deleted_favs[0] == 0:
                 return Response(status=status.HTTP_404_NOT_FOUND)
