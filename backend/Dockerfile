@@ -4,13 +4,10 @@ WORKDIR /app
 
 RUN pip install gunicorn==20.1.0
 
-COPY ./backend/requirements.txt .
+COPY ./requirements.txt . 
 
 RUN pip install --upgrade pip && pip3 install -r requirements.txt --no-cache-dir
 
-COPY ./backend/ .
-
-COPY ../entrypoint.sh /app/entrypoint.sh
-COPY ../data/ /app/data/
+COPY . .
 
 CMD ["gunicorn", "foodgram.wsgi", "--bind", "0.0.0.0:8000" ]

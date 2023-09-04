@@ -106,10 +106,8 @@ MEDIA_ROOT = '/media/'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-CORS_ALLOW_ORIGINS = [
-    "http://foodgram-project.myvnc.com",
-    "https://foodgram-project.myvnc.com",
-]
+
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^/api/.*$'
 
 REST_FRAMEWORK = {
