@@ -54,5 +54,5 @@ python3 manage.py runserver
 ```
 
 Над проектом работали: 
-- Backend - https://github.com/alexrashkin
+- Backend  - https://github.com/alexrashkin
 - Frontend - https://github.com/yandex-praktikum/foodgram-project-react
