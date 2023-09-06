@@ -37,7 +37,7 @@ services:
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
     ports:
-      - 8000:80
+      - 80:80
     depends_on:
       - frontend
       - backend
