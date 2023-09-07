@@ -13,7 +13,7 @@ class Command(BaseCommand):
         file_dir = '/home/sanya/foodgram-project-react/backend'
 
         if not os.path.exists(file_dir):
-            file_dir = '/backend'
+            file_dir = 'foodgram-project-react/backend'
 
         with open(os.path.join(file_dir, 'ingredients.csv'),
                   'r', encoding='utf-8') as csvfile:
