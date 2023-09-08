@@ -10,10 +10,10 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        file_dir = '/home/sanya/foodgram-project-react/backend'
+        file_dir = '/home/sanya/foodgram-project-react/backend/'
 
         if not os.path.exists(file_dir):
-            file_dir = '/app/backend'
+            file_dir = '/app/'
 
         with open(os.path.join(file_dir, 'ingredients.csv'),
                   'r', encoding='utf-8') as csvfile:
