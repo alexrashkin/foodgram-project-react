@@ -4,6 +4,10 @@
 
 Стек: Python3, Django3, Django REST framework, React, PostgreSQL, gunicorn, nginx, Яндекс.Облако
 
+Проект доступен по доменному имени https://foodgram-project.myvnc.com
+Логин администратора: creator
+Пароль администратора: creator
+
 # Как запустить проект:
 
 Клонировать репозиторий и перейти в него в командной строке:
