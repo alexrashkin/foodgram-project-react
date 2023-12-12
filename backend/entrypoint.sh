@@ -13,4 +13,4 @@ gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000
 
 cp -r /app/collected_static/. /backend_static/static/
 
-source load_env.sh
+# source load_env.sh
