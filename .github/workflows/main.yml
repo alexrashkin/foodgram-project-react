@@ -98,6 +98,8 @@ jobs:
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.SSH_KEY }}
         script: |
           cd foodgram-project-react
           sudo docker-compose -f docker-compose.production.yml down
