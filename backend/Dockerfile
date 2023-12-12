@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN pip install gunicorn==20.1.0
 
-COPY ./requirements.txt . 
+COPY ./backend/requirements.txt . 
 
 RUN pip install --upgrade pip && pip3 install -r requirements.txt --no-cache-dir
 
