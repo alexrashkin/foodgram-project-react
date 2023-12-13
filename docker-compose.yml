@@ -39,6 +39,7 @@ services:
       - ./frontend/build:/usr/share/nginx/html/
       - ./docs/:/usr/share/nginx/html/api/docs/
       - /etc/letsencrypt:/etc/letsencrypt
+      - ./nginx:/etc/nginx/conf.d
     ports:
       - 8000:80
     depends_on:
