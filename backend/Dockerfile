@@ -10,4 +10,4 @@ RUN pip install --upgrade pip && pip3 install -r requirements.txt --no-cache-dir
 
 COPY . .
 
-CMD ["gunicorn", "foodgram.wsgi", "--bind", "0.0.0.0:8000" ]
+CMD ["gunicorn", "foodgram.wsgi", "--bind", "0.0.0.0:80" ]
