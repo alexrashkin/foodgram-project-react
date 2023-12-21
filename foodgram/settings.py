@@ -22,7 +22,6 @@ INSTALLED_APPS = [
     'djoser',
     'django_filters',
     'api',
-    'foodgram',
     'recipes',
     'users',
     'corsheaders',
