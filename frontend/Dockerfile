@@ -8,4 +8,4 @@ RUN npm install --legacy-peer-deps
 RUN npm install react-meta-tags --legacy-peer-deps
 RUN npm run build
 RUN npm install -g http-server
-CMD ["http-server", "-p", "8000", "./build"]
+CMD ["http-server", "-p", "8002", "./build"]
