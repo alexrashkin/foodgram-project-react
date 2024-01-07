@@ -5,7 +5,7 @@ services:
     image: postgres:13.10
     env_file: .env
     ports:
-      - "5432:5432"
+      - "9276:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
 
@@ -39,8 +39,8 @@ services:
       - /etc/letsencrypt/archive/foodgram-project.myvnc.com/fullchain1.pem:/cert_fullchain.pem
       - /etc/letsencrypt/archive/foodgram-project.myvnc.com/privkey1.pem:/cert_privkey.pem 
     ports:
-      - 80:80
-      - 443:443
+      - 8002:80
+      - 8003:443
     depends_on:
       - frontend
       - backend
