@@ -39,8 +39,8 @@ services:
       - /etc/letsencrypt/archive/foodgram-project.myvnc.com/fullchain1.pem:/cert_fullchain.pem
       - /etc/letsencrypt/archive/foodgram-project.myvnc.com/privkey1.pem:/cert_privkey.pem 
     ports:
-      - 8002:81
-      - 8003:444
+      - 8081:8080
+      - 8082:8443
     depends_on:
       - frontend
       - backend
