@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import Q, F, Sum
+from django.db.models import F, Q, Sum
 from django.shortcuts import HttpResponse, get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
