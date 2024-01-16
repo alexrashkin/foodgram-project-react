@@ -1,4 +1,5 @@
 import django_filters
+import django_filters.rest_framework as filters
 from django.contrib.auth import get_user_model
 from recipes.models import Ingredient, Recipe, Tag
 
@@ -16,14 +17,23 @@ class IngredientFilter(django_filters.FilterSet):
         fields = ('name', 'measurement_unit')
 
 
-class RecipeFilter(django_filters.FilterSet):
-    tags = django_filters.ModelMultipleChoiceFilter(
+class RecipeFilter(filters.FilterSet):
+    tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
         to_field_name='slug',
         queryset=Tag.objects.all(),
     )
-    author = django_filters.ModelChoiceFilter(queryset=User.objects.all())
+    author = filters.ModelChoiceFilter(queryset=User.objects.all())
 
     class Meta:
         model = Recipe
         fields = ('tags', 'author')
+
+    def filter_queryset(self, queryset):
+        tags = self.data.get('tags')
+        if tags and tags == "__all__":
+            return queryset
+        if not tags:
+            return Recipe.objects.none()
+
+        return super().filter_queryset(queryset)
