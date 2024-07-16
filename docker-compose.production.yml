@@ -36,8 +36,8 @@ services:
       - static:/backend_static/
       - media:/media/
       - ./docs/:/usr/share/nginx/html/api/docs/     
-      - /etc/letsencrypt/archive/foodgram-project.myvnc.com/fullchain1.pem:/cert_fullchain.pem
-      - /etc/letsencrypt/archive/foodgram-project.myvnc.com/privkey1.pem:/cert_privkey.pem 
+      - /etc/letsencrypt/archive/foodgram-project.myvnc.com-0001/fullchain1.pem:/cert_fullchain.pem
+      - /etc/letsencrypt/archive/foodgram-project.myvnc.com-0001/privkey1.pem:/cert_privkey.pem 
     ports:
       - 8081:80
       - 8082:443
