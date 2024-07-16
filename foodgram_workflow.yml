@@ -102,10 +102,10 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd foodgram-project-react
-          sudo docker-compose -f docker-compose.production.yml down
-          sudo docker-compose -f docker-compose.production.yml pull
-          sudo docker-compose -f docker-compose.production.yml up -d
-          sudo docker-compose -f docker-compose.production.yml exec backend python manage.py makemigrations
-          sudo docker-compose -f docker-compose.production.yml exec backend python manage.py migrate
-          sudo docker-compose -f docker-compose.production.yml exec backend python manage.py collectstatic --no-input
-          sudo docker-compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+          docker compose -f docker-compose.production.yml down
+          docker compose -f docker-compose.production.yml pull
+          docker compose -f docker-compose.production.yml up -d
+          docker compose -f docker-compose.production.yml exec backend python manage.py makemigrations
+          docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+          docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic --no-input
+          docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
