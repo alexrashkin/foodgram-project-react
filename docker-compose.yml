@@ -17,7 +17,7 @@ services:
       - static:/frontend_static/
 
   nginx:
-    build: ./nginx/
+    build: ./nginx_dev/
     env_file: .env
     volumes:
       - static:/backend_static/

@@ -34,7 +34,7 @@ class RecipeFilter(filters.FilterSet):
         tags = self.data.get('tags')
         if tags and tags == "__all__":
             return queryset
-        if not tags:
+        pk_in_kwargs = self.request.resolver_match.kwargs.get('pk')
+        if not tags and not pk_in_kwargs:
             return Recipe.objects.none()
-
         return super().filter_queryset(queryset)

@@ -5,12 +5,11 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from recipes.models import Ingredient
 
-
 class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        file_dir = '/home/sanya/foodgram-project-react/backend/'
+        file_dir = '/home/alex/Dev/foodgram-project-react/backend'
 
         if not os.path.exists(file_dir):
             file_dir = '/app/'
