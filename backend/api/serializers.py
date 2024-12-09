@@ -170,7 +170,7 @@ class RecipeSaveSerializer(serializers.ModelSerializer):
 
             if amount is not None and amount < 1:
                 raise serializers.ValidationError(
-                    'Количество ингредиентов не может быть меньше 1'
+                    'Количество ингредиентов не может быть меньше одного'
                 )
 
             ingredient_tuple = (ingredient.id, amount)
