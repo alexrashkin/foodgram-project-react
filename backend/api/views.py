@@ -113,7 +113,8 @@ class RecipesViewset(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """
-        Создает новый рецепт и связывает с текущим пользователем как автором.
+        Создает новый рецепт и связывает с
+        текущим пользователем как автором.
         """
 
         serializer.save(author=self.request.user)
